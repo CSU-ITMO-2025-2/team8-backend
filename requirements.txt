@@ -1,1 +1,6 @@
+user-agents
+pydantic
+fastapi
+python-dotenv
+pydantic-settings
 sqlalchemy

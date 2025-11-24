@@ -20,14 +20,6 @@ class Singleton(type):
 class DAO(metaclass=Singleton):
 
     def __init__(self, url_object=Settings.SQLALCHEMY_DATABASE_URI()):
-        # Создание url_object, если у вас работа только с env, иначе передать из Settings.SQLALCHEMY_DATABASE_URI()
-        # url_object = URL.create(
-        #     drivername=os.getenv("DRIVERNAME"),
-        #     username=os.getenv("DB_LOGIN"),
-        #     password=os.getenv("DB_PASSWORD"),  # plain (unescaped) text
-        #     host=os.getenv("DB_HOST"),
-        #     database=os.getenv("DB_NAME"),
-        # )
         self.db_engine = create_async_engine(url_object, pool_recycle=3, pool_pre_ping=True)
         self.Session = async_scoped_session(async_sessionmaker(bind=self.db_engine, expire_on_commit=False),
                                             current_task)

@@ -2,6 +2,7 @@ import uuid
 from calendar import timegm
 from datetime import datetime, timezone
 from typing import Annotated
+from enum import Enum
 
 from fastapi import HTTPException
 from fastapi.params import Depends
@@ -9,24 +10,35 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from starlette import status
 
+from dal import Database
 from .auth_config import AuthConfig
 from .exceptions import AuthenticateUserError, ValidateCredentialsError, UserNotFound
-from ..db.DAO import DAO
-from ..db.schema.Base import TokenType, Role
+from ..dal.DAO import DAO
 from ..rest.Authentication.entity import TokensResponse, TokenData, RefreshTokenRequest
 from ..rest.User.entity import User
 
+class TokenType(Enum):
+    ACCESS_TOKEN = "ACCESS_TOKEN"
+    EMAIL_CONFIRMATION = "EMAIL_CONFIRMATION"
+    PASSWORD_RESET = "PASSWORD_RESET"
+    CODE_CONFIRMATION = "CODE_CONFIRMATION"
+    REFRESH_TOKEN = "REFRESH_TOKEN"
+    LINK_TG = "LINK_TG"
+
+class Role(Enum):
+    USER = "USER"
+    ADMIN = "ADMIN"
 
 class AuthJWT(AuthConfig):
     blacklist = set()
     oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/login")
 
     @classmethod
-    async def authenticate_user(cls, email: str, password: str):
-        user = await DAO().User.get(email)
+    async def authenticate_user(cls, login: str, password: str):
+        user = await Database.AuthService.get_user(login)
         if user:
             if user.password != "":
-                if cls.verify_value(password, user.password):
+                if cls.verify_value(password, user.hashed_password):
                     return user
         raise AuthenticateUserError(status_code=status.HTTP_401_UNAUTHORIZED,
                                     detail="Incorrect username or password", )
@@ -60,19 +72,10 @@ class AuthJWT(AuthConfig):
     def generate_session_key() -> str:
         return uuid.uuid4().hex
 
-    @classmethod
-    async def set_session_key(cls, user_id: str, session_key: str = generate_session_key()):
-        result = await DAO().User.set_session_key(user_id, session_key)
-        if result.rowcount == 0:
-            return False
-        return session_key
-
-
 async def validate_token(token: Annotated[str, Depends(AuthJWT.oauth2_scheme)]):
     try:
         payload = jwt.decode(token, AuthJWT._secret_key, algorithms=AuthJWT._algorithm, options={"verify_exp": False})
         user_id = payload.get("sub")
-        session_key = payload.get("sid")
         token_type = TokenType(payload.get("type"))
 
         if token_type != TokenType.REFRESH_TOKEN:
@@ -81,19 +84,19 @@ async def validate_token(token: Annotated[str, Depends(AuthJWT.oauth2_scheme)]):
                 raise ValidateCredentialsError()
 
         if token_type == TokenType.CODE_CONFIRMATION:
-            return TokenData(user_id=user_id, session_key=session_key, token_type=token_type)
+            return TokenData(user_id=user_id, token_type=token_type)
 
         if token_type == TokenType.PASSWORD_RESET:
             jti = payload.get("jti")
             if jti in AuthJWT.blacklist:
                 raise ValidateCredentialsError()
             AuthJWT.blacklist.add(jti)
-            return TokenData(user_id=user_id, session_key=session_key, token_type=token_type)
+            return TokenData(user_id=user_id, token_type=token_type)
 
-        if None in (user_id, session_key, token_type):
+        if None in (user_id, token_type):
             raise ValidateCredentialsError()
 
-        return TokenData(user_id=user_id, session_key=session_key, token_type=token_type)
+        return TokenData(user_id=user_id, token_type=token_type)
 
     except JWTError:
         raise ValidateCredentialsError()
