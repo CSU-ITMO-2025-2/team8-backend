@@ -1,0 +1,5 @@
+{
+  "authjwt_secret_key": "SECRET_KEY",
+  "authjwt_algorithm": "HS256",
+  "tg_authjwt_secret_key": "SECRET_KEY_TG"
+}
