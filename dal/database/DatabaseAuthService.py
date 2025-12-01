@@ -23,7 +23,7 @@ class DatabaseAuthService:
     async def register_user(
         *,
         login: str,
-        password: str,
+        hashed_password: str,
         session: AsyncSession = None,
     ) -> User:
         """
@@ -39,50 +39,16 @@ class DatabaseAuthService:
         if existing_user is not None:
             raise UserAlreadyExistsError(f"User with login {login!r} already exists")
 
-        # Хэшируем пароль
-        hashed = hash_password(password)
-
         user = User(
             login=login,
-            hashed_password=hashed,
+            hashed_password=hashed_password,
             is_active=True,
             is_admin=False,
         )
         session.add(user)
-        # flush чтобы получить id, но не коммитим — пусть connection декоратор/юнит работы решает
         await session.flush()
         await session.refresh(user)
 
-        return user
-
-    @staticmethod
-    @connection
-    async def authenticate_user(
-        *,
-        login: str,
-        password: str,
-        session: AsyncSession = None,
-    ) -> Optional[User]:
-        """
-        Авторизация пользователя:
-        - возвращает User, если логин/пароль валидные
-        - возвращает None, если невалидные
-
-        Если хочешь — вместо None можно кидать InvalidCredentialsError.
-        """
-
-        stmt = select(User).where(User.login == login)
-        user = await session.scalar(stmt)
-
-        if user is None:
-            # нет такого логина
-            return None
-
-        if not verify_password(password, user.hashed_password):
-            # пароль не подходит
-            return None
-
-        # можно доп. проверку: if not user.is_active: ...
         return user
 
     @staticmethod

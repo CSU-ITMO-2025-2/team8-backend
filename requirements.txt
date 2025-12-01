@@ -1,6 +1,7 @@
-user-agents
-pydantic
-fastapi
-python-dotenv
-pydantic-settings
-sqlalchemy
+SQLAlchemy==2.0.44
+fastapi==0.123.0
+pydantic==2.12.5
+starlette==0.50.0
+python-dotenv==1.2.1
+pydantic-settings==2.12.0
+passlib[bcrypt]==1.7.4
