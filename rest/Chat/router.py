@@ -125,6 +125,7 @@ class ChatAPI:
         try:
             msg = await Database.ChatService.create_message(
                 session_id=session.id,
+                user_id=current_user.id,
                 role=role,
                 content=data.content,
                 meta=data.meta,
