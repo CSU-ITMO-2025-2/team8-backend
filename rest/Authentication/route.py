@@ -36,7 +36,7 @@ class Authentication:
             "/registration",
             self.registration,
             methods=["POST"],
-            response_model=TokenResponse,
+            response_model=int,
             responses={
                 409: {
                     "description": "User already exists",
@@ -72,7 +72,7 @@ class Authentication:
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Already registered",
             )
-        except Exception:
+        except Exception as e:
             # можно залогировать и отдать 500
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
