@@ -118,7 +118,7 @@ class Message(Base):
     latency_ms: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
     # Любые дополнительные данные: сырой ответ модели, http-пэйлоады и т.д.
-    metadata: Mapped[Dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    meta: Mapped[Dict[str, Any] | None] = mapped_column(JSON, nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), index=True

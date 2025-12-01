@@ -27,7 +27,6 @@ class AuthenticationError(HTTPException):
 
 class BasicAuth:
 
-
     @staticmethod
     def create_token(login, password):
         return f"Basic {b64encode(f'{login}:{password}'.encode()).decode()}"

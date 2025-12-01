@@ -56,7 +56,7 @@ class _LoadConfig(BaseSettings):
                 if key not in defined_field_names:
                     self.EXTRA_PARAMS[key] = value
 
-    model_config = SettingsConfigDict(env_file=f"{os.path.dirname(os.path.abspath(__file__))}\\.env.test", extra='ignore')
+    model_config = SettingsConfigDict(env_file=f"{os.path.dirname(os.path.abspath(__file__))}\\.env", extra='ignore')
 
 
 class Settings:

@@ -6,8 +6,7 @@ from starlette import status
 from core.auth import pwd_context
 from dal import Database
 from dal.database.DatabaseAuthService import UserAlreadyExistsError
-from entity import UserRegistrationForm, \
-    TokenResponse
+from rest.Authentication.entity import TokenResponse, UserRegistrationForm
 
 security = HTTPBasic()
 
