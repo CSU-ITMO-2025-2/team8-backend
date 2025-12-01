@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.auth import BasicAuth
 from dal import Database
+from dal.database.DatabaseChatService import ChatSessionNotFound
 from dal.schema.Entity.BackendSchema import User
 from rest.Chat.schemas import (
     ChatSessionCreate,
@@ -121,10 +122,13 @@ class ChatAPI:
         # Для пользовательского эндпоинта обычно форсим роль = user
         role = MessageRole.user
 
-        msg = await Database.ChatService.create_message(
-            session=session,
-            role=role,
-            content=data.content,
-            meta=data.meta,
-        )
-        return msg
+        try:
+            msg = await Database.ChatService.create_message(
+                session_id=session.id,
+                role=role,
+                content=data.content,
+                meta=data.meta,
+            )
+            return msg
+        except ChatSessionNotFound:
+            raise HTTPException(status_code=404, detail="Chat session not found")

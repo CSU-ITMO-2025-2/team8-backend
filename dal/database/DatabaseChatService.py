@@ -8,12 +8,13 @@ from dal.DAO import connection
 from dal.schema.Entity.BackendSchema import ChatSession, Message
 from rest.Chat.schemas import ChatSessionCreate, MessageCreate, MessageRole
 
+class ChatSessionNotFound(Exception):
+    pass
 
 class DatabaseChatService:
     @staticmethod
     @connection
     async def create_session(
-        *,
         user_id: int,
         data: ChatSessionCreate,
         session: AsyncSession = None,
@@ -46,7 +47,6 @@ class DatabaseChatService:
     @staticmethod
     @connection
     async def get_user_sessions(
-        *,
         user_id: int,
         limit: int = 20,
         offset: int = 0,
@@ -66,7 +66,6 @@ class DatabaseChatService:
     @staticmethod
     @connection
     async def get_session_for_user(
-        *,
         session_id: int,
         user_id: int,
         with_messages: bool = False,
@@ -88,6 +87,7 @@ class DatabaseChatService:
     async def create_message(
         *,
         session_id: int,
+        user_id: int,
         role: MessageRole,
         content: str,
         meta: Optional[Dict[str, Any]] = None,
@@ -102,6 +102,9 @@ class DatabaseChatService:
         if chat_session is None:
             # тут лучше своё исключение бросить, а в ручке перевести в 404
             raise ValueError("ChatSession not found")
+
+        if chat_session.user_id != user_id:
+            raise ChatSessionNotFound()
 
         msg = Message(
             session_id=session_id,
