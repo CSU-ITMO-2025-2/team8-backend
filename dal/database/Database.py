@@ -3,6 +3,8 @@ from .DatabaseAuthService import DatabaseAuthService
 
 import logging
 
+from .DatabaseChatService import DatabaseChatService
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -11,3 +13,4 @@ logging.getLogger('alembic').setLevel(logging.DEBUG)
 
 class Database:
     AuthService = DatabaseAuthService()
+    ChatService = DatabaseChatService()

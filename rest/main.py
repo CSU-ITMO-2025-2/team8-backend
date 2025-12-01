@@ -4,7 +4,8 @@ import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.openapi.docs import get_swagger_ui_html, get_swagger_ui_oauth2_redirect_html, get_redoc_html
 
-from rest.Authentication.route import Authentication
+from rest.Authentication.router import Authentication
+from rest.Chat.router import ChatAPI
 
 app = FastAPI(title="team-8", version="0.1", docs_url=None, redoc_url=None)
 
@@ -44,6 +45,7 @@ async def add_process_time_header(request: Request, call_next):
 
 
 app.include_router(Authentication().router)
+app.include_router(ChatAPI().router)
 
 
 if __name__ == "__main__":

@@ -27,7 +27,7 @@ class MessageRole(str, enum.Enum):
     USER = "user"
     ASSISTANT = "assistant"
     SYSTEM = "system"
-    TOOL = "tool"  # на будущее, если будут функции/инструменты
+    TOOL = "tool"
 
 
 # ---------- МОДЕЛИ ----------

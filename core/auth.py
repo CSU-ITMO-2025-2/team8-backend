@@ -1,8 +1,9 @@
+import inspect
 from base64 import b64encode
 from functools import lru_cache
 
-from fastapi import HTTPException
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import HTTPException, Depends
+from fastapi.security import OAuth2PasswordRequestForm, HTTPBasicCredentials, HTTPBasic
 
 from dal import Database
 from dal.schema.Entity.BackendSchema import User
@@ -14,6 +15,8 @@ pwd_context = CryptContext(
     schemes=["bcrypt"],
     deprecated="auto"
 )
+
+security = HTTPBasic()
 
 
 class AuthenticationError(HTTPException):
@@ -32,7 +35,10 @@ class BasicAuth:
         return f"Basic {b64encode(f'{login}:{password}'.encode()).decode()}"
 
     @staticmethod
-    @lru_cache
+    async def token_auth(credentials: HTTPBasicCredentials = Depends(security)):
+        return await BasicAuth.auth(credentials.username, credentials.password)
+
+    @staticmethod
     async def auth(login, password) -> User:
         user = await Database.AuthService.get_user(login=login)
 

@@ -46,7 +46,7 @@ class DatabaseAuthService:
             is_admin=False,
         )
         session.add(user)
-        await session.flush()
+        await session.commit()
         await session.refresh(user)
 
         return user

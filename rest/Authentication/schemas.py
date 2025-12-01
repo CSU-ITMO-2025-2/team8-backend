@@ -1,7 +1,4 @@
-from datetime import datetime
-from typing import Optional
-
-from pydantic import BaseModel, EmailStr, constr, model_validator, Field
+from pydantic import BaseModel, Field
 
 
 class UserRegistrationForm(BaseModel):
