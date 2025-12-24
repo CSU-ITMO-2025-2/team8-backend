@@ -87,9 +87,9 @@ class DatabaseChatService:
     async def create_message(
         *,
         session_id: int,
-        user_id: int,
         role: MessageRole,
         content: str,
+        user_id: int = None,
         meta: Optional[Dict[str, Any]] = None,
         prompt_tokens: Optional[int] = None,
         completion_tokens: Optional[int] = None,
@@ -98,13 +98,14 @@ class DatabaseChatService:
     ) -> Message:
         # Проверяем, что сессия пользователя существует (по желанию)
         # можно убрать этот select, если проверяешь в хэндлере
-        chat_session = await session.get(ChatSession, session_id)
-        if chat_session is None:
-            # тут лучше своё исключение бросить, а в ручке перевести в 404
-            raise ValueError("ChatSession not found")
+        if user_id is not None:
+            chat_session = await session.get(ChatSession, session_id)
+            if chat_session is None:
+                # тут лучше своё исключение бросить, а в ручке перевести в 404
+                raise ValueError("ChatSession not found")
 
-        if chat_session.user_id != user_id:
-            raise ChatSessionNotFound()
+            if chat_session.user_id != user_id:
+                raise ChatSessionNotFound()
 
         msg = Message(
             session_id=session_id,

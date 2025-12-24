@@ -55,5 +55,6 @@ class BasicAuth:
 
 
 if __name__ == '__main__':
-    test_token = BasicAuth.create_token("username", "password")
+    test_token = BasicAuth.create_token("string", "string")
+    print(test_token)
     pass
